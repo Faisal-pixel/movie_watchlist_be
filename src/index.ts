@@ -1,5 +1,6 @@
 import express from 'express';
-import authRoutes from './Routes/auth'
+import authRoutes from './Routes/auth';
+import watchlistRoutes from './Routes/watchlistRoutes';
 
 const app = express();
 const port = 3000;
@@ -13,6 +14,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/auth', authRoutes) // This line tells Express that any requests that start with /auth should be handled by the routes definded in the authRoutes which
 // is coming from Routes/auth.ts. You are basically mounting all path in the authRoutes to /auth
 // So the final post request api will be POST /auth/signup
+
+app.use('/watchlist', watchlistRoutes);
 
 
 app.listen(port, () => {

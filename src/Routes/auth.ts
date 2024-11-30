@@ -45,7 +45,6 @@ router.post('/signup', [
             // check if the user already exists
             
             const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-            console.log('result', result.rows);
             if(result.rows.length > 0) {
                 res.status(400).json({"success": false, message: 'User already exists', error: 'User already exists'});
                 return;
@@ -55,7 +54,7 @@ router.post('/signup', [
             const hashedPassword = await hashPasword(password);
             // Time account was created
             const created_at = new Date();
-            await pool.query("INSERT INTO users (firstname, lastname, password_hash, email, username, created_at, notification_enabled) VALUES ($1, $2, $3, $4, $5, $6, $7)", [firstname, lastname, (await hashedPassword).toString(), email, username, created_at, false]);
+            await pool.query("INSERT INTO users (firstname, lastname, password_hash, email, username, created_at, notification_enabled) VALUES ($1, $2, $3, $4, $5, $6, $7)", [firstname, lastname, hashedPassword, email, username, created_at, false]);
 
             res.status(201).json({"success": true, message: 'User registered successfully'});
             
@@ -63,7 +62,7 @@ router.post('/signup', [
     
            if (error instanceof Error) {
                res.status(500).json({"success": false, error: error.message, message: 'Error creating user'});
-               console.log(error.message)
+                return;
            } else {
                res.status(500).json({"success": false, error: 'Unknown error', message: 'Error creating user'});
            }
@@ -86,7 +85,6 @@ router.post('/login',
         body('password').notEmpty().withMessage('Password is required').isLength({min: 6}).withMessage('Password must be at least 6 characters')
     ],
     async (req: Request, res: Response) => {
-        console.log('login route');
         const validateErrors = validationResult(req);
         if(!validateErrors.isEmpty()) {
             res.status(400).json({success: false, message: 'Invalid input',  errors: validateErrors.array()});
@@ -112,6 +110,9 @@ router.post('/login',
             
             const token = generateToken(user.email, user.username);
             res.status(200).json({success: true, message: "User logged in successfully", token: token});
+
+            // Insert last login into database
+            await pool.query('UPDATE users SET last_login = $1 WHERE email = $2', [new Date(), email]);
 
         } catch (error) {
             if(error instanceof Error) {

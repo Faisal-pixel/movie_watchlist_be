@@ -1,6 +1,7 @@
 import express from 'express';
 import authRoutes from './Routes/auth';
 import watchlistRoutes from './Routes/watchlistRoutes';
+import userRoutes from '../src/Routes/user.routes'
 
 const app = express();
 const port = 3000;
@@ -16,6 +17,8 @@ app.use('/auth', authRoutes) // This line tells Express that any requests that s
 // So the final post request api will be POST /auth/signup
 
 app.use('/watchlist', watchlistRoutes);
+
+app.use('/user', userRoutes);
 
 
 app.listen(port, () => {

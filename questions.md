@@ -280,4 +280,150 @@ ALTER COLUMN username DROP NOT NULL;
 
 Constraints like NOT NULL and UNIQUE define how data is stored and validated. While they can't be directly "modified," you can always drop and recreate them with new conditions. Let me know if you need help working with specific constraints!
 
-# QUESTION:
+# QUESTION: 
+What is Multer?
+
+# ANSWER:
+Multer is a middlware for nodejs. It helps handle file uploads like images, pdfs, etc through forms sent to your server. Multer works with the multipart/form-data content type, which is commonly used for forms that upload files.
+
+The reaosn multer is used is because, files arent really sent as plain text instead  it comes in chunks of binary data. Multer makes it easy to handle this data, process the file, and save it to your desired location (your server or database).
+
+1. To install multer:
+```bash
+npm install multer
+```
+
+2. Set up Multer in your project.
+Multer requires basic configurations to decide:
+<ul>
+<li>Where to store the files</li>
+<li>What to name the files</li>
+<li>Which types of files to accept.</li>
+</ul>
+3. Use Multer in Routes:
+It works as middleware in Express routes to handle file uploads.
+
+
+# QUESTION: How to set up multer
+
+# ANSWER:
+Well since its a middleware we create it in the middlewares folder.
+
+```ts
+const multer = require('multer'); // Import Multer
+
+// Define where uploaded files should go and what to name them
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    // 'destination' is the folder to save uploaded files
+    cb(null, 'uploads/'); // Save files in the 'uploads' folder
+  },
+  filename: function (req, file, cb) {
+    // 'filename' determines the name of the uploaded file
+    const uniqueName = Date.now() + '-' + file.originalname;
+    cb(null, uniqueName); // Add a unique timestamp to avoid overwrites
+  },
+});
+
+// Initialize Multer with the storage configuration
+const upload = multer({ storage: storage });
+
+```
+<strong>cb</strong> in the code above stands for callback. It's a function that Multer calls when it's done processing the file. The first argument is an error (if any), and the second argument is the result. It is this way because it follows the <strong> Node.js convention for error-first callbacks</strong>
+
+1. First Parameter (null):
+  -  This represents the error, if there’s one.
+  -  In this case, null means no errors occurred.
+2. Second Parameter:
+  -  This is the result of the operation.
+  -  In the destination function, it’s the path where the file should be saved.
+  -  In the filename function, it’s the name of the file.
+
+Then create the route to upload files
+    
+```ts
+    app.post('/upload', upload.single('profilePic'), (req, res) => {
+    // Multer processes the file before this callback runs
+
+    // Access the uploaded file details
+    console.log(req.file);
+
+    // Respond to the client
+    res.send('File uploaded successfully!');
+    });
+```
+
+Explanation of the Code:
+
+1. upload.single('profilePic'):
+
+   - This tells Multer to expect a single file upload with the field name profilePic.
+   - profilePic matches the name attribute of the input field in your form.
+2. req.file:
+   - Contains details of the uploaded file, such as its name, size, type, and location.
+
+# QUESTION: Key Multer Features to Explore
+
+# ANSWER:
+1. Multiple File Uploads: Handle multiple files by using upload.array('photos', 3) to accept up to 3 files.
+```ts
+app.post('/upload', upload.array('photos', 3), (req, res) => {
+  // Access the uploaded files
+  console.log(req.files);
+
+  // Respond to the client
+  res.send('Files uploaded successfully!');
+});
+```
+
+2. File Validation: Restrict uploads to specific file types or sizes
+```ts
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+    cb(null, true); // Accept the file
+  } else {
+    cb(new Error('Invalid file type'), false); // Reject the file
+  }
+};
+
+const upload = multer({ storage: storage, fileFilter: fileFilter, limits: { fileSize: 2 * 1024 * 1024 } }); // 2MB limit
+```
+
+# QUESTION: How to setup Cloudinary for free cloud storage.
+
+# ANSWER:
+
+Cloudinary is a cloud-based image and video management service that offers storage, optimization, and delivery of media assets. It provides a free tier that allows you to store and manage a limited number of images and videos.
+
+```ts
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+const app = express();
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Configure Multer with Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'profile_pictures', // Folder in Cloudinary
+    allowed_formats: ['jpeg', 'png', 'jpg'], // Allowed file types
+  },
+});
+
+const upload = multer({ storage });
+
+// Endpoint for uploading profile picture
+app.post('/upload-profile', upload.single('profilePicture'), (req, res) => {
+  res.json({ message: 'Profile picture uploaded!', fileUrl: req.file.path });
+});
+```
+What happens here:
+  -  Uploaded files are sent to Cloudinary and stored in the profile_pictures folder.
+  -  The URL (e.g., https://res.cloudinary.com/<cloud-name>/image/upload/...) is returned and can be saved in your database

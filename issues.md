@@ -1,0 +1,1 @@
+1. I logged in with a new account using postman and the previous token i was able to use it, although i wasnt able to update the field, i can only update a field with the token for that user but still. How do i ensure that once a user leaves the app, they are logged out and the token is invalidated?

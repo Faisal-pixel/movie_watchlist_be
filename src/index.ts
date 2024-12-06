@@ -1,10 +1,17 @@
 import express from 'express';
 import authRoutes from './Routes/auth';
 import watchlistRoutes from './Routes/watchlistRoutes';
-import userRoutes from '../src/Routes/user.routes'
+import userRoutes from '../src/Routes/user.routes';
+import cors from 'cors';
 
 const app = express();
 const port = 3000;
+
+app.use(cors({
+  origin: 'http://localhost:3001',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  credentials: true
+}))
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

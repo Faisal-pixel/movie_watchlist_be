@@ -49,6 +49,13 @@ router.post('/signup', [
                 res.status(400).json({"success": false, message: 'User already exists', error: 'User already exists'});
                 return;
             }
+
+            // check if the username already exists
+            const usernameResult = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+            if(usernameResult.rows.length > 0) {
+                res.status(400).json({"success": false, message: 'Username already exists', error: 'Username already exists'});
+                return;
+            }
             
             // Hash the password
             const hashedPassword = await hashPasword(password);

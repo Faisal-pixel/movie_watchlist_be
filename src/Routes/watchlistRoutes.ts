@@ -17,7 +17,7 @@ import { getUserId } from '../Utils/getUserIdUtils';
 const router = express.Router();
 
 // CREATE NEW WATCHLIST
-router.post('/create-watchlist', authenticatToken, body("watchlist_name").notEmpty().withMessage("Watchlist name is required") ,async (req: IRequest, res: Response) => {
+router.post('/create-watchlist', authenticatToken, body("watchlist_name").notEmpty().withMessage("Watchlist name is required"), body("description").notEmpty().withMessage("Description name is required") ,async (req: IRequest, res: Response) => {
     const validationErrors = validationResult(req);
         if(!validationErrors.isEmpty()) {
             res.status(400).json({"success": false, errors: validationErrors.array(), message: 'Invalid input'});
@@ -25,7 +25,7 @@ router.post('/create-watchlist', authenticatToken, body("watchlist_name").notEmp
         }
 
     const {email} = req.user;
-    const {watchlist_name} = req.body;
+    const {watchlist_name, description} = req.body;
 
     try {
         // We can get the user_id by querying the username in the database
@@ -41,7 +41,7 @@ router.post('/create-watchlist', authenticatToken, body("watchlist_name").notEmp
 
         const created_at = new Date();
 
-        const result = await pool.query("INSERT INTO watchlist (user_id, watchlist_name, created_at) VALUES ($1, $2, $3) RETURNING id", [id, watchlist_name, created_at]);
+        const result = await pool.query("INSERT INTO watchlist (user_id, watchlist_name, created_at, description) VALUES ($1, $2, $3, $4) RETURNING id", [id, watchlist_name, created_at, description]);
 
         res.status(201).json({success: true, message: "Watchlist created successfully", data: result.rows[0]});
     } catch (error) {
@@ -80,6 +80,32 @@ router.get('/get-watchlist/:watchlist_id', authenticatToken, param("watchlist_id
         }
 
         res.status(200).json({success: true, message: "Watchlist queried succesfully", data: watchlist.rows[0]});
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({success: false, message: "Server error", error: error.message});
+            return;
+        }
+    }
+});
+
+// GET ALL WATCHLISTS
+
+router.get('/get-watchlists', authenticatToken, async (req: IRequest, res: Response) => {
+    const {email} = req.user;
+
+    try {
+        // We can get the user_id by querying the username in the database
+        const user = await getUserId(email, res);
+        const {id} = user || {};
+
+        const watchlists = await pool.query('SELECT * FROM watchlist WHERE user_id = $1', [id]);
+        if(watchlists.rows.length === 0) {
+            res.status(400).json({success: false, message: "No watchlist found"});
+            return;
+        }
+
+
+        res.status(200).json({success: true, message: "Watchlists queried succesfully", data: watchlists.rows});
     } catch (error) {
         if (error instanceof Error) {
             res.status(500).json({success: false, message: "Server error", error: error.message});

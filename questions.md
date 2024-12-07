@@ -427,3 +427,12 @@ app.post('/upload-profile', upload.single('profilePicture'), (req, res) => {
 What happens here:
   -  Uploaded files are sent to Cloudinary and stored in the profile_pictures folder.
   -  The URL (e.g., https://res.cloudinary.com/<cloud-name>/image/upload/...) is returned and can be saved in your database
+
+# QUESTION: How to add a new column to a table in SQL?
+
+# ANSWER:
+To add a new column to an existing table in SQL, you can use the ALTER TABLE statement with the ADD COLUMN clause.
+```sql
+ALTER TABLE table_name
+ADD COLUMN column_name data_type [constraints];
+```

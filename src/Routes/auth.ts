@@ -104,6 +104,7 @@ router.post('/login',
             const result = await pool.query("SELECT * FROM users WHERE email = $1", [email])
             if(result.rows.length === 0) {
                 res.status(400).json({success: false, message: "Email does not exist"})
+                return;
             }
 
             const user = result.rows[0];
@@ -111,6 +112,7 @@ router.post('/login',
             const isPasswordMatch = await comparePassword(password, user.password_hash);
             if(!isPasswordMatch) {
                 res.status(400).json({success: false, message: "Password does not match"});
+                return;
             }
 
             // Generate jwt token
@@ -120,6 +122,7 @@ router.post('/login',
 
             // Insert last login into database
             await pool.query('UPDATE users SET last_login = $1 WHERE email = $2', [new Date(), email]);
+            return;
 
         } catch (error) {
             if(error instanceof Error) {

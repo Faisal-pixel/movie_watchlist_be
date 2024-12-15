@@ -41,6 +41,13 @@ create table watchlist_movie (
 	primary key (watchlist_id, movie_id),
 	added_at timestamp
 )
+create table watchlist_movie (
+	id SERIAL UNIQUE not null,
+	watchlist_id integer references watchlist(id),
+	tmdb_movie_id integer unique not null,
+	primary key (watchlist_id, tmdb_movie_id), -- This ensures uniqueness of the tmdb_movie_id in the watchlist_movie table for a given watchlist_id --
+	added_at timestamp not null
+)
 
 create table genre (
 id serial primary key,

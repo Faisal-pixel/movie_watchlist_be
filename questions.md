@@ -436,3 +436,94 @@ To add a new column to an existing table in SQL, you can use the ALTER TABLE sta
 ALTER TABLE table_name
 ADD COLUMN column_name data_type [constraints];
 ```
+
+# QUESTION: I tried to make two columns composite primary keys but with an id column also a primary key but it didn'work.
+
+# ANSWER:
+
+The error occurs because a table in PostgreSQL can only have one primary key constraint, and you're trying to define two (id as primary key and a composite primary key).
+
+To fix this, remove the id column as a primary key and instead make the combination of watchlist_id and tmdb_movie_id the primary key. Here's the corrected table definition:
+
+```sql
+CREATE TABLE watchlist_movie (
+    watchlist_id INTEGER REFERENCES watchlist(id),
+    tmdb_movie_id INTEGER NOT NULL,
+    added_at TIMESTAMP NOT NULL,
+    PRIMARY KEY (watchlist_id, tmdb_movie_id)
+);
+```
+<strong>Explanation:</strong>
+1. The combination of watchlist_id and tmdb_movie_id is now the composite primary key, ensuring that a movie can only appear in a specific watchlist once
+2. The id column is removed since it's redundant if you're using a composite key. Because now since we have two columns that can uniquely identify a row, we don't need an additional id column. Since they can only be the same once.
+
+<strong>Key Takeaway:</strong>
+- When using a composite primary key, you don't need a separate id column as the primary key.You can only define one primary key constraint on a table in PostgreSQL. Composite keys are a good choice when the uniqueness of a record is based on the combination of two or more columns.
+
+# QUESTION: How do I generate the current date and time in SQL?
+
+# ANSWER:
+In SQL, you can use the CURRENT_TIMESTAMP function to generate the current date and time. This function returns the current date and time in the format YYYY-MM-DD HH:MM:SS.
+
+Here's how you can use it to insert the current date and time into a column:
+
+```sql
+INSERT INTO table_name (column_name, created_at)
+VALUES ('value', CURRENT_TIMESTAMP);
+```
+
+OR
+
+To generate the current date and time for the added_at column, you can use the NOW() function in PostgreSQL, which returns the current timestamp.
+
+Here's the corrected INSERT statement:
+
+```sql
+INSERT INTO watchlist_movie (watchlist_id, tmdb_movie_id, added_at)
+VALUES (1, 12345, NOW());
+```
+
+If you frequently want the added_at column to default to the current timestamp, you can set a default value for the column in the table definition:
+
+```sql
+ALTER TABLE watchlist_movie 
+ALTER COLUMN added_at SET DEFAULT NOW();
+```
+After setting this default, you can omit the added_at column in your INSERT statements, and PostgreSQL will automatically use the current timestamp:
+
+```sql
+INSERT INTO watchlist_movie (watchlist_id, tmdb_movie_id)
+VALUES (1, 12345);
+```
+
+# QUESTION: How do I use WHERE clause with JOIN in SQL?
+
+# ANSWER:
+When using a JOIN in SQL, you can apply the WHERE clause to filter the rows based on conditions involving columns from the joined tables. The WHERE clause is used to specify the conditions that must be met for the rows to be included in the result set.
+The correct order for a JOIN is before the WHERE clause, not after it. Here's the corrected query:
+
+```sql
+SELECT 
+    wm.watchlist_id, 
+    wm.tmdb_movie_id, 
+    wm.added_at, 
+    w.user_id, 
+    w.created_at, 
+    w.watchlist_name, 
+    w.description
+FROM 
+    watchlist_movie wm
+JOIN 
+    watchlist w ON w.id = wm.watchlist_id
+WHERE 
+    w.user_id = 1;
+```
+<strong>Explanation:</strong>
+1. JOIN Placement: The JOIN clause is placed before the WHERE clause, as required by SQL syntax.
+2. Filtering with WHERE: The WHERE clause filters the rows based on the condition w.user_id = 1, ensuring that only rows where the user_id is 1 are included in the result set.
+3. Table Aliases: Shortened table names with aliases (wm for watchlist_movie and w for watchlist) to make the query more concise and readable.
+4. Column References: Ensure all column references are correctly qualified to avoid ambiguity (e.g., w.user_id instead of user_id).
+
+This query retrieves all watchlist_movie rows that belong to the user with user_id = 1. The JOIN ensures that data from both the watchlist_movie and watchlist tables is combined based on the matching watchlist_id.
+
+# QUESTION: 

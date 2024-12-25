@@ -35,16 +35,11 @@ user_id integer references users(id),
 created_at timestamp
 )
 
-create table watchlist_movie (
-	watchlist_id integer references watchlist(id),
-	movie_id integer references movies(id),
-	primary key (watchlist_id, movie_id),
-	added_at timestamp
-)
+
 create table watchlist_movie (
 	id SERIAL UNIQUE not null,
-	watchlist_id integer references watchlist(id),
-	tmdb_movie_id integer unique not null,
+	watchlist_id integer references watchlist (id),
+	tmdb_movie_id integer not null,
 	primary key (watchlist_id, tmdb_movie_id), -- This ensures uniqueness of the tmdb_movie_id in the watchlist_movie table for a given watchlist_id --
 	added_at timestamp not null
 )
@@ -54,10 +49,12 @@ id serial primary key,
 name varchar(50)
 )
 
-create table genre_movies (
-genre_id integer references genre(id),
-movie_id integer references movies(id),
-primary key (genre_id, movie_id)
+CREATE Table movie_genre (
+	id serial not null unique,
+	tmdb_movie_id integer unique not null,
+	genre_id integer not null,
+	primary key (tmdb_movie_id, genre_id),
+	foreign key (genre_id) references genre (id) on delete cascade
 )
 
 create table streaks (

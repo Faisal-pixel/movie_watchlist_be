@@ -75,6 +75,12 @@ if(streak.rows.length === 0) {
 }
 ```
 
+# Process for editing a watchlist
+1. PUT /watchlists/:watchlist_id
+2. When the user clicks on edit watchlist, the can edit the following things: name, description.
+3. We receive the watchlist_id through the params and the name and description through the body.
+4. Then we check if the watchlist exists for the user. If it doesnt we return an error message.
+5. Then after confirming it exists, we then check if the it is the
 
 
 

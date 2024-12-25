@@ -97,11 +97,6 @@ router.patch('/update-profile', authenticatToken, validateRequest, fileUploader,
         const user = await getUserId(email, res);
         const {id, profile_picture} = user || {}
 
-        // if(!id) {
-        //     res.status(400).json({"success": false, "message": "User does not exist" })
-        //     return;
-        // }
-
         // Handling file upload
         const file = req.file;
         //Check for when there are no fields to update
@@ -135,20 +130,14 @@ router.patch('/update-profile', authenticatToken, validateRequest, fileUploader,
                 await pool.query('UPDATE users SET profile_picture = $1 WHERE id = $2', [result.url, id]);
             }
 
-            if(firstname || lastname || newEmail) {
-                await pool.query('UPDATE users SET firstname = COALESCE($1, username), lastname = COALESCE($2, lastname), email = COALESCE($3, email) WHERE id = $4', [firstname, lastname, newEmail, id]);
-            }
-            res.status(200).json({"success": true, "message": "User updated successfully"});
-            return;
-        } else {
-            res.status(400).json({"success": false, "message": "Profile picture is required" });
-            return;
+            
         }
-
         // Update user details
-        // await pool.query('UPDATE users SET username = $1, email = $2 WHERE id = $3', [name, newEmail, id]);
-
+        if(firstname || lastname || newEmail) {
+            await pool.query('UPDATE users SET firstname = COALESCE($1, firstname), lastname = COALESCE($2, lastname), email = COALESCE($3, email) WHERE id = $4', [firstname, lastname, newEmail, id]);
+        }
         res.status(200).json({"success": true, "message": "User updated successfully"});
+        return;
     } catch (error) {
         if(error instanceof Error) {
             res.status(500).json({"success": false, "message": "Error updating user", "error": error.message });

@@ -105,4 +105,6 @@ npm install --save-dev @types/bcrypt
 ```
 
 
-# FRONTEND DEVVELOPMENT
+# NOTES
+### OPTIONAL PARAMETERS:
+So i learnt that it is possible to make parameters optional. If i dont make them optional, ti doesnt even get to the express validator but if i do make it optional, it gets to the express validator and then i can check if the parameter is undefined or not. So i can make a parameter optional by adding a question mark after the parameter name.

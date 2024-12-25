@@ -42,6 +42,15 @@ for (let genre of response.genres) {
 
 ```
 
+# Process for deleting a movie from a watchlist
+1. DELETE /watchlists/:watchlist_id/movies/:movie_id
+2. So when the user clicks delete a movie, we receive the tmdb_movie_id and the watchlist_id through the params. 
+3. We first check if the watchlist exist for the user. If it doesnt we return an error message.
+4. Then we check if the movie exists in the watchlist_movie table for the watchlist_id. If it doesnt we return an error message that the movie does not exist in this watchlist.
+5. If it does exist, we delete the movie from the watchlist_movie table. DELETE FROM watchlist_movie WHERE watchlist_id = $1 AND tmdb_movie_id = $2;
+6. The return a success message.
+
+
 # NOTE
 1. I noticed that any time i leave sql for like a long time, I usually get confused on how many to many and join tables work. I need to keep practicing this so I don't forget it. But here is my thought process...
 

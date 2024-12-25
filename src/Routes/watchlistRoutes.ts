@@ -9,6 +9,7 @@ import { getUserId } from '../Utils/getUserIdUtils';
 import { TWatchlist } from 'src/types/frontend/frontend-types';
 import { getMovieGenres } from '../Utils/getMovieDetails';
 import { TmovieGenre } from 'src/types/types';
+import { validateErrors } from '../Utils/express-validator';
 // 1. To create a new watchlist we need to save into our database user_id, created_at, and the name of the watchlist.
 // TO the above we can get the token from the user, verify the token and get the user_id from the token. Then we can use it to save into the
 // watchlist table
@@ -132,41 +133,7 @@ router.get('/get-watchlists', authenticatToken, async (req: IRequest, res: Respo
     }
 });
 
-// DELETE A WATCHLIST /delete-watchlist/:watchlist_id
 
-router.delete('/delete-watchlist/:watchlist_id', authenticatToken, param("watchlist_id").notEmpty().withMessage("Watchlist ID is required"), async (req: IRequest, res: Response) => {
-    // Firstly we validate the input
-    const validationErrors = validationResult(req);
-
-    if(!validationErrors.isEmpty()) {
-        res.status(400).json({"success": false, errors: validationErrors.array(), message: 'Invalid input'});
-        return;
-    }
-    // Then we destructure the email and watchlist_id from the request
-    const {email} = req.user;
-    const {watchlist_id} = req.params;
-
-    try {
-        // We can get the user_id by querying the username in the database
-        const user = await getUserId(email, res);
-        const {id} = user || {};
-
-        const watchlist = await pool.query('SELECT * FROM watchlist WHERE user_id = $1 AND id = $2', [id, watchlist_id]);
-        if(watchlist.rows.length === 0) {
-            res.status(400).json({success: false, message: "Watchlist does not exist or unauthorized access"});
-            return;
-        }
-
-        await pool.query('DELETE FROM watchlist WHERE id = $1', [watchlist_id]);
-
-        res.status(200).json({success: true, message: "Watchlist deleted succesfully"});
-    } catch (error) {
-        if (error instanceof Error) {
-            res.status(500).json({success: false, message: "Server error", error: error.message});
-            return;
-        }
-    }
-})
 
 // ADD MOVIE TO WATCHLIST /add-movie-to-watchlist/:watchlist_id
 
@@ -226,5 +193,86 @@ router.post('/add-movie-to-watchlist/:watchlist_id', authenticatToken, body("tmd
         }
     }
 });
+
+/** DELETE REQUEST METHODS */
+
+// DELETE A WATCHLIST /delete-watchlist/:watchlist_id
+
+router.delete('/delete-watchlist/:watchlist_id', authenticatToken, param("watchlist_id").notEmpty().withMessage("Watchlist ID is required"), async (req: IRequest, res: Response) => {
+    // Firstly we validate the input
+    const validationErrors = validationResult(req);
+
+    if(!validationErrors.isEmpty()) {
+        res.status(400).json({"success": false, errors: validationErrors.array(), message: 'Invalid input'});
+        return;
+    }
+    // Then we destructure the email and watchlist_id from the request
+    const {email} = req.user;
+    const {watchlist_id} = req.params;
+
+    try {
+        // We can get the user_id by querying the username in the database
+        const user = await getUserId(email, res);
+        const {id} = user || {};
+
+        const watchlist = await pool.query('SELECT * FROM watchlist WHERE user_id = $1 AND id = $2', [id, watchlist_id]);
+        if(watchlist.rows.length === 0) {
+            res.status(400).json({success: false, message: "Watchlist does not exist or unauthorized access"});
+            return;
+        }
+
+        await pool.query('DELETE FROM watchlist WHERE id = $1', [watchlist_id]);
+
+        res.status(200).json({success: true, message: "Watchlist deleted succesfully"});
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({success: false, message: "Server error", error: error.message});
+            return;
+        }
+    }
+});
+
+// DELETE A MOVIE FROM A WATCHLIST /watchlists/:watchlist_id/movies/:movie_id
+
+router.delete(
+    '/:watchlist_id/movies/:tmdb_movie_id', 
+    authenticatToken, 
+    param("watchlist_id").notEmpty().withMessage("Watchlist ID is required"), 
+    param("tmdb_movie_id").notEmpty().withMessage("Movie ID is required"),
+    (req: Request, res: Response, next: express.NextFunction) => validateErrors(req, res, next),
+    async (req: IRequest, res: Response) => {
+        const {watchlist_id, tmdb_movie_id} = req.params;
+        console.log(watchlist_id, tmdb_movie_id)
+        const {email} = req.user;
+
+        try {
+            // We can get the user_id by querying the username in the database
+            const user = await getUserId(email, res);
+            const {id} = user || {};
+
+            /**CHECKING IF THE WATCHLIST EXIST FOR THIS USER */
+            const watchlist = await pool.query('SELECT * FROM watchlist WHERE user_id = $1 AND id = $2', [id, watchlist_id]);
+            if(watchlist.rows.length === 0) {
+                res.status(400).json({success: false, message: "Watchlist does not exist or unauthorized access"});
+                return;
+            }
+
+            /**CHECKING IF THE MOVIE EXIST IN THE WATCHLIST BY CHECKING THE WATCHLIST_MOVIE TABLE */
+            const watchlist_movie_result = await pool.query("SELECT * FROM watchlist_movie WHERE tmdb_movie_id = $1 and watchlist_id = $2", [tmdb_movie_id, watchlist_id])
+            if(watchlist_movie_result.rows.length === 0) {
+                res.status(400).json({success: false, message: "Movie does not exist in this watclist"});
+                return;
+            }
+
+            await pool.query('DELETE FROM watchlist_movie WHERE watchlist_id = $1 AND tmdb_movie_id = $2', [watchlist_id, tmdb_movie_id]);
+
+            res.status(200).json({success: true, message: "Movie deleted from watchlist succesfully"});
+        } catch (error) {
+            if (error instanceof Error) {
+                res.status(500).json({success: false, message: "Server error", error: error.message});
+                return;
+            }
+        }
+    });
 
 export default router;

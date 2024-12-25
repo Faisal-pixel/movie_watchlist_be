@@ -45,3 +45,11 @@ export type TmovieGenre = {
     id: number,
     name: string
 }
+
+export type TStreak = {
+    id: number,
+    user_id: number,
+    streak_count: number,
+    start_streak_date: Date | null,
+    last_streak_update: Date | null,
+} 

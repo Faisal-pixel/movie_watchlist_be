@@ -526,4 +526,48 @@ WHERE
 
 This query retrieves all watchlist_movie rows that belong to the user with user_id = 1. The JOIN ensures that data from both the watchlist_movie and watchlist tables is combined based on the matching watchlist_id.
 
+# QUESTION: Why does my absolute import in TypeScript throw a 'MODULE_NOT_FOUND' error while a relative import works?
+
+# ANSWER:
+When using absolute imports in TypeScript, you need to configure the module resolution settings in your tsconfig.json file to tell TypeScript how to resolve these paths. The error 'MODULE_NOT_FOUND' typically occurs when TypeScript can't find the module based on the specified path.
+
+Absolute paths like src/Utils/getUserIdUtils rely on TypeScript or your runtime environment being configured to treat src as the base directory. Without proper configuration, Node.js doesn't recognize src as a valid module path, so it throws a MODULE_NOT_FOUND error.
+
+Now we also need to let nodejs know because it does not use the tsconfig.json file for module resolution.
+
+<strong>Fixing the Issue</strong>:
+To make src work as the base directory, you need to configure both TypeScript and Node.js (or your runtime).
+
+1. I basically installed tsconfig-paths and ts-node in my project.
+```bash
+npm install tsconfig-paths
+```
+2. I then added the following to my nodemon.json file
+```json
+{
+    "exec": "ts-node -r tsconfig-paths/register ./src/index.ts",
+    "ext": "ts,js,json",            
+    "ignore": ["dist/*"],
+    "watch": ["src"]
+}
+```
+3. I then added the following to my package.json file
+```json
+"scripts": {
+    "dev": "nodemon"
+}
+```
+4. Then I added this to my tsconfig.json file
+```json
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "*": ["*"]
+    }
+  }
+}
+```
+5. Then I restarted my server and it worked.
+
 # QUESTION: 

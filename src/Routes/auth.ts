@@ -4,6 +4,7 @@ import pool from "../db/db";
 import { body, validationResult } from "express-validator";
 import { comparePassword, hashPasword } from "../Utils/passwordUtils";
 import { generateToken } from "../Utils/generateTokenUtils";
+import { TStreak } from "src/types/types";
 
 const router = express.Router();
 
@@ -201,13 +202,7 @@ router.post(
         "SELECT * FROM streaks WHERE user_id = $1",
         [user.id]
       );
-      const streakData: {
-        id: number;
-        user_id: number;
-        streak_count: number;
-        start_streak_date: Date | null;
-        last_streak_update: Date | null;
-      } = streaks.rows[0];
+      const streakData: TStreak = streaks.rows[0];
 
       const yesterday = new Date(rightNow);
       yesterday.setDate(rightNow.getDate() - 1);

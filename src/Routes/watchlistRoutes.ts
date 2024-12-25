@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 import pool from '../db/db';
 import { body, param, validationResult } from 'express-validator';
 import { comparePassword, hashPasword } from '../Utils/passwordUtils';
-import { generateToken } from '../Utils/generateTokenUtils';
 import { authenticatToken } from '../middlewares/authMiddleware';
 import { IRequest } from 'src/types/reques.type';
 import { getUserId } from '../Utils/getUserIdUtils';

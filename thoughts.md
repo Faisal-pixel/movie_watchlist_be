@@ -50,8 +50,34 @@ for (let genre of response.genres) {
 5. If it does exist, we delete the movie from the watchlist_movie table. DELETE FROM watchlist_movie WHERE watchlist_id = $1 AND tmdb_movie_id = $2;
 6. The return a success message.
 
+# Process for getting the user streak
+1. GET /streaks
+2. First we authenticate the user.
+3. Update the log in route that inserts into the streak table.
+4. In the log in route, when the user logs in, we first get the streak_count from the database for that user, we check if the last login date is equal to today's date. If it is,
+we dont do anything. If it is not, we then check if the last login date is equal to yesterday's date. If it is, we increment the streak by 1. If it is not, we reset the streak to 1.
+```ts
+// In the login route after logging in
+const streak = await pool.query('SELECT * FROM streaks WHERE user_id = $1', [user_id]);
+if(streak.rows.length === 0) {
+  // insert into the streak table
+  INSERT into streaks (user_id, streak_count, last_login_date) VALUES ($1, 1, $2);
+} else {
+  if (streak.rows[0].last_login_date === today) {
+    // do nothing
+  } else if (streak.rows[0].last_login_date === yesterday) {
+    // increment the streak by 1
+    UPDATE streaks SET streak_count = streak_count + 1, last_login_date = $1 WHERE user_id = $2;
+  } else {
+    // reset the streak to 1
+    UPDATE streaks SET streak_count = 1, last_login_date = $1 WHERE user_id = $2;
+  }
+}
+```
 
-# NOTE
+
+
+
 1. I noticed that any time i leave sql for like a long time, I usually get confused on how many to many and join tables work. I need to keep practicing this so I don't forget it. But here is my thought process...
 
 We select from the watchlist_movie table, and then we join the watchlist table. How does this work, thing is there could several watchlist in my table where I dont haev a movie in it yet right? So that means they dont exist in the watchlist_movie table. So when I am selecting and i am using join watchlist on watchlist.id = watchlist_movie.watchlist_id, what it means is that I am selecting al watchlist where the id actually exists in the watchlist_movie table. So pgAdmin prints out a table of all the watchlist that have movies in them

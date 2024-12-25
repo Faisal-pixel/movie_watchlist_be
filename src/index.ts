@@ -2,6 +2,7 @@ import express from 'express';
 import authRoutes from './Routes/auth';
 import watchlistRoutes from './Routes/watchlistRoutes';
 import userRoutes from '../src/Routes/user.routes';
+import streaksRoutes from './Routes/streaks';
 import cors from 'cors';
 
 const app = express();
@@ -26,6 +27,8 @@ app.use('/auth', authRoutes) // This line tells Express that any requests that s
 app.use('/watchlist', watchlistRoutes);
 
 app.use('/user', userRoutes);
+
+app.use('/streaks', streaksRoutes);
 
 
 app.listen(port, () => {

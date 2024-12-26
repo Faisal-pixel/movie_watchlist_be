@@ -22,13 +22,11 @@ router.get(
   async (req: IRequest, res: Response) => {
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          errors: validationErrors.array(),
-          message: "Invalid input",
-        });
+      res.status(400).json({
+        success: false,
+        errors: validationErrors.array(),
+        message: "Invalid input",
+      });
       return;
     }
 
@@ -49,12 +47,10 @@ router.get(
         [id, watchlist_id]
       );
       if (queryRows.rows.length === 0) {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: "Watchlist does not exist or unauthorized access",
-          });
+        res.status(400).json({
+          success: false,
+          message: "Watchlist does not exist or unauthorized access",
+        });
         return;
       }
       const watchlist: TWatchlist = {
@@ -71,22 +67,18 @@ router.get(
           };
         }),
       };
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Watchlist queried succesfully",
-          data: watchlist,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Watchlist queried succesfully",
+        data: watchlist,
+      });
     } catch (error) {
       if (error instanceof Error) {
-        res
-          .status(500)
-          .json({
-            success: false,
-            message: "Server error",
-            error: error.message,
-          });
+        res.status(500).json({
+          success: false,
+          message: "Server error",
+          error: error.message,
+        });
         return;
       }
     }
@@ -115,22 +107,18 @@ router.get(
         return;
       }
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Watchlists queried succesfully",
-          data: watchlists.rows,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Watchlists queried succesfully",
+        data: watchlists.rows,
+      });
     } catch (error) {
       if (error instanceof Error) {
-        res
-          .status(500)
-          .json({
-            success: false,
-            message: "Server error",
-            error: error.message,
-          });
+        res.status(500).json({
+          success: false,
+          message: "Server error",
+          error: error.message,
+        });
         return;
       }
     }
@@ -156,13 +144,11 @@ router.post(
   async (req: IRequest, res: Response) => {
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          errors: validationErrors.array(),
-          message: "Invalid input",
-        });
+      res.status(400).json({
+        success: false,
+        errors: validationErrors.array(),
+        message: "Invalid input",
+      });
       return;
     }
 
@@ -193,22 +179,18 @@ router.post(
         [id, watchlist_name, created_at, description]
       );
 
-      res
-        .status(201)
-        .json({
-          success: true,
-          message: "Watchlist created successfully",
-          data: result.rows[0],
-        });
+      res.status(201).json({
+        success: true,
+        message: "Watchlist created successfully",
+        data: result.rows[0],
+      });
     } catch (error) {
       if (error instanceof Error) {
-        res
-          .status(500)
-          .json({
-            success: false,
-            message: "Server error",
-            error: error.message,
-          });
+        res.status(500).json({
+          success: false,
+          message: "Server error",
+          error: error.message,
+        });
         return;
       }
     }
@@ -227,13 +209,11 @@ router.post(
     const validationErrors = validationResult(req);
 
     if (!validationErrors.isEmpty()) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          errors: validationErrors.array(),
-          message: "Invalid input",
-        });
+      res.status(400).json({
+        success: false,
+        errors: validationErrors.array(),
+        message: "Invalid input",
+      });
       return;
     }
     // Then we destructure the email and watchlist_id from the request
@@ -251,12 +231,10 @@ router.post(
         [id, watchlist_id]
       );
       if (watchlist.rows.length === 0) {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: "Watchlist does not exist or unauthorized access",
-          });
+        res.status(400).json({
+          success: false,
+          message: "Watchlist does not exist or unauthorized access",
+        });
         return;
       }
 
@@ -265,12 +243,10 @@ router.post(
         [watchlist_id, tmdb_movie_id]
       );
       if (does_movie_exist.rows.length > 0) {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: "Movie already exist in the watchlist",
-          });
+        res.status(400).json({
+          success: false,
+          message: "Movie already exist in the watchlist",
+        });
         return;
       }
 
@@ -303,21 +279,17 @@ router.post(
         );
       }
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Movie added to watchlist succesfully",
-        });
+      res.status(200).json({
+        success: true,
+        message: "Movie added to watchlist succesfully",
+      });
     } catch (error) {
       if (error instanceof Error) {
-        res
-          .status(500)
-          .json({
-            success: false,
-            message: "Server error",
-            error: error.message,
-          });
+        res.status(500).json({
+          success: false,
+          message: "Server error",
+          error: error.message,
+        });
         return;
       }
     }
@@ -326,65 +298,25 @@ router.post(
 
 /** PATCH REQUEST METHODS */
 
-router.patch("/:watchlist_id", authenticatToken, editWatchlistValidateRequest, async (req: IRequest, res: Response) => {
+router.patch(
+  "/:watchlist_id",
+  authenticatToken,
+  editWatchlistValidateRequest,
+  async (req: IRequest, res: Response) => {
     const { email } = req.user;
     const { watchlist_id } = req.params;
     const { watchlist_name, description } = req.body;
 
     try {
-
-        const user = await getUserId(email, res);
-        const { id } = user || {};
-
-        const watchlist = await pool.query('SELECT * FROM watchlist WHERE user_id = $1 AND id = $2', [id, watchlist_id]);
-        if(watchlist.rows.length === 0) {
-            res.status(400).json({ success: false, message: "Watchlist does not exist or unauthorized access" });
+        
+        if(!watchlist_name && !description) {
+            res.status(400).json({
+                success: false,
+                message: "No data to update"
+            })
             return;
         }
-  
-      
 
-        const result = await pool.query('UPDATE watchlist SET watchlist_name = COALESCE($1, watchlist_name), description = COALESCE($1, description) WHERE id = $3 RETURNING *', [watchlist_name, description, watchlist_id]);
-
-        res.status(200).json({ success: true, message: "Watchlist updated succesfully", data: result.rows[0] });
-        
-    } catch (error) {
-        if (error instanceof Error) {
-            res.status(500).json({ success: false, message: "Server error", error: error.message });
-            return;
-        }
-        
-    }
-});
-
-/** DELETE REQUEST METHODS */
-
-// DELETE A WATCHLIST /delete-watchlist/:watchlist_id
-
-router.delete(
-  "/delete-watchlist/:watchlist_id",
-  authenticatToken,
-  param("watchlist_id").notEmpty().withMessage("Watchlist ID is required"),
-  async (req: IRequest, res: Response) => {
-    // Firstly we validate the input
-    const validationErrors = validationResult(req);
-
-    if (!validationErrors.isEmpty()) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          errors: validationErrors.array(),
-          message: "Invalid input",
-        });
-      return;
-    }
-    // Then we destructure the email and watchlist_id from the request
-    const { email } = req.user;
-    const { watchlist_id } = req.params;
-
-    try {
-      // We can get the user_id by querying the username in the database
       const user = await getUserId(email, res);
       const { id } = user || {};
 
@@ -402,11 +334,18 @@ router.delete(
         return;
       }
 
-      await pool.query("DELETE FROM watchlist WHERE id = $1", [watchlist_id]);
+      const result = await pool.query(
+        "UPDATE watchlist SET watchlist_name = COALESCE($1, watchlist_name), description = COALESCE($2, description) WHERE id = $3 RETURNING *",
+        [watchlist_name, description, watchlist_id]
+      );
 
       res
         .status(200)
-        .json({ success: true, message: "Watchlist deleted succesfully" });
+        .json({
+          success: true,
+          message: "Watchlist updated succesfully",
+          data: result.rows[0],
+        });
     } catch (error) {
       if (error instanceof Error) {
         res
@@ -416,6 +355,65 @@ router.delete(
             message: "Server error",
             error: error.message,
           });
+        return;
+      }
+    }
+  }
+);
+
+/** DELETE REQUEST METHODS */
+
+// DELETE A WATCHLIST /delete-watchlist/:watchlist_id
+
+router.delete(
+  "/delete-watchlist/:watchlist_id",
+  authenticatToken,
+  param("watchlist_id").notEmpty().withMessage("Watchlist ID is required"),
+  async (req: IRequest, res: Response) => {
+    // Firstly we validate the input
+    const validationErrors = validationResult(req);
+
+    if (!validationErrors.isEmpty()) {
+      res.status(400).json({
+        success: false,
+        errors: validationErrors.array(),
+        message: "Invalid input",
+      });
+      return;
+    }
+    // Then we destructure the email and watchlist_id from the request
+    const { email } = req.user;
+    const { watchlist_id } = req.params;
+
+    try {
+      // We can get the user_id by querying the username in the database
+      const user = await getUserId(email, res);
+      const { id } = user || {};
+
+      const watchlist = await pool.query(
+        "SELECT * FROM watchlist WHERE user_id = $1 AND id = $2",
+        [id, watchlist_id]
+      );
+      if (watchlist.rows.length === 0) {
+        res.status(400).json({
+          success: false,
+          message: "Watchlist does not exist or unauthorized access",
+        });
+        return;
+      }
+
+      await pool.query("DELETE FROM watchlist WHERE id = $1", [watchlist_id]);
+
+      res
+        .status(200)
+        .json({ success: true, message: "Watchlist deleted succesfully" });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(500).json({
+          success: false,
+          message: "Server error",
+          error: error.message,
+        });
         return;
       }
     }
@@ -447,12 +445,10 @@ router.delete(
         [id, watchlist_id]
       );
       if (watchlist.rows.length === 0) {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: "Watchlist does not exist or unauthorized access",
-          });
+        res.status(400).json({
+          success: false,
+          message: "Watchlist does not exist or unauthorized access",
+        });
         return;
       }
 
@@ -462,12 +458,10 @@ router.delete(
         [tmdb_movie_id, watchlist_id]
       );
       if (watchlist_movie_result.rows.length === 0) {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: "Movie does not exist in this watclist",
-          });
+        res.status(400).json({
+          success: false,
+          message: "Movie does not exist in this watclist",
+        });
         return;
       }
 
@@ -476,21 +470,17 @@ router.delete(
         [watchlist_id, tmdb_movie_id]
       );
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Movie deleted from watchlist succesfully",
-        });
+      res.status(200).json({
+        success: true,
+        message: "Movie deleted from watchlist succesfully",
+      });
     } catch (error) {
       if (error instanceof Error) {
-        res
-          .status(500)
-          .json({
-            success: false,
-            message: "Server error",
-            error: error.message,
-          });
+        res.status(500).json({
+          success: false,
+          message: "Server error",
+          error: error.message,
+        });
         return;
       }
     }

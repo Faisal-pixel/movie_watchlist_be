@@ -1,5 +1,5 @@
 export type TWatchlist = {
-    watchlist_id: number,
+    id: number,
     user_id: number,
     created_at: Date,
     watchlist_name: string,

@@ -54,7 +54,7 @@ router.get(
         return;
       }
       const watchlist: TWatchlist = {
-        watchlist_id: queryRows.rows[0].watchlist_id,
+        id: queryRows.rows[0].watchlist_id,
         user_id: queryRows.rows[0].user_id,
         created_at: queryRows.rows[0].created_at,
         watchlist_name: queryRows.rows[0].watchlist_name,
@@ -299,7 +299,7 @@ router.post(
 /** PATCH REQUEST METHODS */
 
 router.patch(
-  "/:watchlist_id",
+  "/edit/:watchlist_id",
   authenticatToken,
   editWatchlistValidateRequest,
   async (req: IRequest, res: Response) => {
@@ -308,7 +308,6 @@ router.patch(
     const { watchlist_name, description } = req.body;
 
     try {
-        
         if(!watchlist_name && !description) {
             res.status(400).json({
                 success: false,

@@ -42,18 +42,42 @@ router.get(
       // const watchlist = await pool.query('SELECT * FROM watchlist WHERE user_id = $1 AND id = $2', [id, watchlist_id]);
       // Selecting all the listed columns joining it with the watchlist table but only if the watchlist id exists and the user_id is the
       // same as the user_id in the token
-      const queryRows = await pool.query(
-        "SELECT wm.watchlist_id, wm.tmdb_movie_id, wm.added_at, w.user_id, w.created_at, w.watchlist_name, w.description FROM watchlist_movie wm JOIN watchlist w ON wm.watchlist_id = w.id WHERE w.user_id = $1 AND w.id = $2",
+      const watchlistExist = await pool.query(
+        "SELECT * FROM watchlist WHERE user_id = $1 AND id = $2",
         [id, watchlist_id]
       );
-      if (queryRows.rows.length === 0) {
+      if (watchlistExist.rows.length === 0) {
         res.status(400).json({
           success: false,
           message: "Watchlist does not exist or unauthorized access",
         });
         return;
       }
-      const watchlist: TWatchlist = {
+      const queryRows = await pool.query(
+        "SELECT wm.watchlist_id, wm.tmdb_movie_id, wm.added_at, w.user_id, w.created_at, w.watchlist_name, w.description FROM watchlist_movie wm JOIN watchlist w ON wm.watchlist_id = w.id WHERE w.user_id = $1 AND w.id = $2",
+        [id, watchlist_id]
+      );
+
+      let watchlist: TWatchlist = {} as TWatchlist;
+
+      if(queryRows.rows.length === 0) {
+        watchlist = {
+          id: watchlistExist.rows[0].id,
+          user_id: watchlistExist.rows[0].user_id,
+          created_at: watchlistExist.rows[0].created_at,
+          watchlist_name: watchlistExist.rows[0].watchlist_name,
+          description: watchlistExist.rows[0].description,
+          movies: []
+        }
+        res.status(200).json({
+          success: true,
+          message: "Watchlist queried succesfully",
+          data: watchlist,
+        });
+        return;
+      }
+      
+      watchlist = {
         id: queryRows.rows[0].watchlist_id,
         user_id: queryRows.rows[0].user_id,
         created_at: queryRows.rows[0].created_at,

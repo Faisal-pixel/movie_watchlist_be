@@ -4,7 +4,7 @@ export type TWatchlist = {
     created_at: Date,
     watchlist_name: string,
     description: string
-    movies: TWatchlistMovie[]
+    movies?: TWatchlistMovie[]
 }
 
 export type TWatchlistMovie = {

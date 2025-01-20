@@ -9,7 +9,7 @@ import { TWatchlist } from "src/types/frontend/frontend-types";
 import { getMovieGenres } from "../Utils/getMovieDetails";
 import { TmovieGenre } from "src/types/types";
 import { validateErrors } from "../Utils/express-validator";
-import { editWatchlistValidateRequest } from "src/constants/validate-request";
+import { editWatchlistValidateRequest } from "../constants/validate-request";
 
 const router = express.Router();
 

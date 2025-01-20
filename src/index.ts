@@ -1,7 +1,7 @@
 import express from 'express';
 import authRoutes from './Routes/auth';
 import watchlistRoutes from './Routes/watchlistRoutes';
-import userRoutes from '../src/Routes/user.routes';
+import userRoutes from './Routes/user.routes';
 import streaksRoutes from './Routes/streaks';
 import cors from 'cors';
 

@@ -130,7 +130,7 @@ router.get(
         res.status(400).json({ success: false, message: "No watchlist found" });
         return;
       }
-
+      console.log(watchlists.rows);
       res.status(200).json({
         success: true,
         message: "Watchlists queried succesfully",

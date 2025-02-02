@@ -11,6 +11,11 @@ const config = {
     cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
     tmdbApiKey: process.env.TMDB_API_KEY,
     supabaseDatabaseUrl: process.env.SUPABASE_DATABASE_URL,
+    supabaseDbHost: process.env.SUPABASE_DB_HOST,
+    supabaseDbName: process.env.SUPABASE_DB_NAME,
+    supabaseDbPassword: process.env.SUPABASE_DB_PASSWORD,
+    supabaseDbPort: process.env.SUPABASE_DB_PORT,
+    supabaseDbUser: process.env.SUPABASE_DB_USER,
 }
 
 
